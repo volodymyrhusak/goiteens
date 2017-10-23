@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from flask import Flask, request, render_template, redirect, url_for, session
-from executeSqlite3 import executeSelectOne, executeSelectAll , executeSQL
+from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
+from functools import wraps
 import os
 
 # створюємо головний об'єкт сайту класу Flask
@@ -8,6 +9,16 @@ app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
 app.secret_key = os.urandom(24)
+
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'username' in session:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('login'))
+    return wrap
 
 
 # описуємо логін роут
@@ -28,9 +39,23 @@ def login():
 
     return render_template('login.html')
 
+
 # описуємо домашній роут
 # сіда зможуть попадати тільки GET запроси
+@app.route('/logout')
+@login_required
+def logout():
+    user = session.get('username', None)
+    if user:
+        # якщо в сесії є username тоді видаляємо його
+        del session['username']
+    return redirect(url_for('login'))
+
+
+# описуємо роут для вилогінення
+
 @app.route('/')
+@login_required
 def home():
     user = session.get('username', None)
     context = {}
@@ -46,16 +71,8 @@ def home():
         context['pasww'] = user_data[4]
 
     return render_template('home.html', context=context)
-
-# описуємо роут для вилогінення
 # сіда зможуть попадати тільки GET запроси
-@app.route('/logout')
-def logout():
-    user = session.get('username', None)
-    if user:
-        # якщо в сесії є username тоді видаляємо його
-        del session['username']
-    return redirect(url_for('login'))
+
 
 def addToSession(name):
     session['username'] = name
@@ -63,7 +80,7 @@ def addToSession(name):
 
 @app.route('/registration', methods=["GET", "POST"])
 def registr():
-    context = {'Error':[]}
+    context = {'Error': []}
     if request.method == 'POST':
         email = request.form.get('email', '')
         passw1 = request.form.get('passw1', '')
@@ -71,7 +88,7 @@ def registr():
         first_name = request.form.get('first_name', '')
         last_name = request.form.get('last_name', '')
         name = request.form.get('name', '')
-        check_user = 'SELECT 1 FROM users WHERE name = "{}" or email = "{}"'.format(name,email)
+        check_user = 'SELECT 1 FROM users WHERE name = "{}" or email = "{}"'.format(name, email)
         if executeSelectOne(check_user):
             context['Error'].append('wrong name or email')
         if passw1 != passw2:
@@ -80,14 +97,13 @@ def registr():
         if context['Error']:
             return render_template('reg.html', context=context)
         sql = 'INSERT INTO users (first_name,last_name,name,email,passw) VALUES ("{}","{}","{}","{}","{}")' \
-            .format(first_name,last_name,name,email,passw)
+            .format(first_name, last_name, name, email, passw)
         if executeSQL(sql):
             addToSession(name)
             return redirect(url_for('home'))
 
         context['Error'].append('incorrect data')
     return render_template('reg.html', context=context)
-
 
 
 if __name__ == '__main__':
