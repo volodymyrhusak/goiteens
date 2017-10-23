@@ -6,13 +6,13 @@ from datetime import datetime
 
 
 class UserType(Model):
-    id = IntType(required=True)
+    id = IntType(required=False)
     name = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class UserModel(Model):
-    id = IntType(required=True)
+    id = IntType(required=False)
     first_name = StringType(required=True)
     last_name = StringType(required=True)
     type = ModelType(UserType, required=True)
@@ -26,53 +26,53 @@ class UserModel(Model):
 
 
 class UserAddModel(Model):
-    id = IntType()
-    age = IntType(default=None)
+    id = IntType(required=False)
+    age = IntType(default=None, required=False)
     create_time = DateTimeType(required=True, default=datetime.now())
-    phone = StringType(default=None)
-    address = StringType(default=None)
-    photo = StringType(default=None)
-    ava = StringType(default=None)
-    sex = IntType(default=None)
+    phone = StringType(default=None, required=False)
+    address = StringType(default=None, required=False)
+    photo = StringType(default=None, required=False)
+    ava = StringType(default=None, required=False)
+    sex = IntType(default=None, required=False)
     user = ModelType(UserModel)
 
 
 class GroupUserModel(Model):
-    id = IntType()
-    group = ModelType(UserModel)
-    user = ModelType(UserModel)
+    id = IntType(required=False)
+    group = ModelType(UserModel, required=True)
+    user = ModelType(UserModel, required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class PostModel(Model):
-    id = IntType()
+    id = IntType(required=False)
     title = StringType(required=True)
     photos = ListType(StringType, required=False, default=[])
     text = StringType(required=False, default=None)
     likes = IntType(required=True, default=0)
-    user = ModelType(UserModel)
+    user = ModelType(UserModel, required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class CommentsModel(Model):
-    id = IntType()
+    id = IntType(required=False)
     text = StringType(required=False, default=None)
     likes = IntType(required=True, default=0)
-    user = ModelType(UserModel)
+    user = ModelType(UserModel, required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class PostCommentModel(Model):
-    id = IntType()
-    post = ModelType(PostModel)
-    comment = ModelType(CommentsModel)
+    id = IntType(required=False)
+    post = ModelType(PostModel, required=True)
+    comment = ModelType(CommentsModel, required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class MessegeModel(Model):
-    id = IntType()
-    user_from = ModelType(UserModel)
-    user_to = ModelType(UserModel)
+    id = IntType(required=False)
+    user_from = ModelType(UserModel, required=True)
+    user_to = ModelType(UserModel, required=True)
     is_read = BooleanType(required=True, default=False)
     create_time = DateTimeType(required=True, default=datetime.now())
 
