@@ -2,6 +2,7 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from functools import wraps
+from models.model_manager import UserManager
 import os
 
 # створюємо головний об'єкт сайту класу Flask
@@ -40,7 +41,8 @@ def login():
     return render_template('login.html')
 
 
-# описуємо домашній роут
+
+# описуємо роут для вилогінення
 # сіда зможуть попадати тільки GET запроси
 @app.route('/logout')
 @login_required
@@ -52,8 +54,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-# описуємо роут для вилогінення
 
+# описуємо домашній роут
+# сіда зможуть попадати тільки GET запроси
 @app.route('/')
 @login_required
 def home():
@@ -71,7 +74,6 @@ def home():
         context['pasww'] = user_data[4]
 
     return render_template('home.html', context=context)
-# сіда зможуть попадати тільки GET запроси
 
 
 def addToSession(name):
@@ -82,28 +84,19 @@ def addToSession(name):
 def registr():
     context = {'Error': []}
     if request.method == 'POST':
-        email = request.form.get('email', '')
-        passw1 = request.form.get('passw1', '')
-        passw2 = request.form.get('passw2', '')
-        first_name = request.form.get('first_name', '')
-        last_name = request.form.get('last_name', '')
-        name = request.form.get('name', '')
-        check_user = 'SELECT 1 FROM users WHERE name = "{}" or email = "{}"'.format(name, email)
-        if executeSelectOne(check_user):
+        user = UserManager().getModelFromForm(request.form)
+        if user.check_user():
             context['Error'].append('wrong name or email')
-        if passw1 != passw2:
+        if not user.user.password:
             context['Error'].append('incorrect password')
-        passw = passw1
         if context['Error']:
-            return render_template('reg.html', context=context)
-        sql = 'INSERT INTO users (first_name,last_name,name,email,passw) VALUES ("{}","{}","{}","{}","{}")' \
-            .format(first_name, last_name, name, email, passw)
-        if executeSQL(sql):
-            addToSession(name)
+            return render_template('registration.html', context=context)
+        if user.addNewUser():
+            addToSession(user.user.nickname)
             return redirect(url_for('home'))
 
         context['Error'].append('incorrect data')
-    return render_template('reg.html', context=context)
+    return render_template('registration.html', context=context)
 
 
 if __name__ == '__main__':

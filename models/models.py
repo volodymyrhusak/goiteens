@@ -6,15 +6,17 @@ from datetime import datetime
 
 
 class UserType(Model):
+    _name = 'user_type'
     id = IntType(required=False)
-    name = StringType(required=True)
+    type_name = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class UserModel(Model):
+    _name = 'users'
     id = IntType(required=False)
     first_name = StringType(required=True)
-    last_name = StringType(required=True)
+    last_name = StringType(required=False, default='')
     type = ModelType(UserType, required=True)
     descr = StringType(required=False, default='')
     user_photo = StringType(required=False, default='')
@@ -26,13 +28,12 @@ class UserModel(Model):
 
 
 class UserAddModel(Model):
+    _name = 'users_add'
     id = IntType(required=False)
     age = IntType(default=None, required=False)
     create_time = DateTimeType(required=True, default=datetime.now())
     phone = StringType(default=None, required=False)
     address = StringType(default=None, required=False)
-    photo = StringType(default=None, required=False)
-    ava = StringType(default=None, required=False)
     sex = IntType(default=None, required=False)
     user = ModelType(UserModel)
 
@@ -69,7 +70,7 @@ class PostCommentModel(Model):
     create_time = DateTimeType(required=True, default=datetime.now())
 
 
-class MessegeModel(Model):
+class MessageModel(Model):
     id = IntType(required=False)
     user_from = ModelType(UserModel, required=True)
     user_to = ModelType(UserModel, required=True)
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     user.descr = 'test'
     user.user_photo = 'test'
     user.user_photos = ['test']
-    user.email = 'test@test.test'
+    user.email = 'testtest.test'
     user.nickname = 'test'
     user.password = 'test'
 

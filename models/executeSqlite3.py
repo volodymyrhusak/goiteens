@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-
+from sqlite3 import IntegrityError
 from models import conn
 
 def executeSelectOne(sql):
@@ -25,6 +25,6 @@ def executeSQL(sql):
         curs.execute(sql)
         conn.commit()
         return True
-    except sqlite3.IntegrityError:
+    except IntegrityError:
         return False
 
