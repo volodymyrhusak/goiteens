@@ -9,7 +9,8 @@ import os
 app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
-app.secret_key = os.urandom(24)
+# app.secret_key = os.urandom(24)
+app.secret_key = '123'
 
 
 def login_required(f):
@@ -30,12 +31,9 @@ def login():
         # якщо метод пост дістаємо дані з форми і звіряємо чи є такий користвач в базі данних
         # якшо є то в дану сесію добавляєм ключ username
         # і перекидаємо користувача на домашню сторінку
-        email = request.form.get('email', '')
-        passw = request.form.get('passw', '')
-        sql = 'select name from users where email = "{}" and passw = "{}"'.format(email, passw)
-        name = executeSelectOne(sql)[0]
-        if name:
-            addToSession(name)
+        user = UserManager()
+        if user.loginUser(request.form):
+            addToSession(user)
             return redirect(url_for('home'))
 
     return render_template('login.html')
@@ -60,24 +58,17 @@ def logout():
 @app.route('/')
 @login_required
 def home():
-    user = session.get('username', None)
     context = {}
-    if user:
+    if session.get('username', None):
+        user = UserManager.load_models[session['username']]
         # якщо в сесії є username тоді дістаємо його дані
         # добавляємо їх в словник для передачі в html форму
-        sql = '''SELECT first_name,last_name,name,email,passw FROM users where name = "{}" '''.format(user)
-        user_data = executeSelectOne(sql)
-        context['first_name'] = user_data[0]
-        context['last_name'] = user_data[1]
-        context['name'] = user_data[2]
-        context['email'] = user_data[3]
-        context['pasww'] = user_data[4]
-
+        context['user'] = user
     return render_template('home.html', context=context)
 
 
-def addToSession(name):
-    session['username'] = name
+def addToSession(user):
+    session['username'] = user.user.nickname
 
 
 @app.route('/registration', methods=["GET", "POST"])
@@ -92,7 +83,7 @@ def registr():
         if context['Error']:
             return render_template('registration.html', context=context)
         if user.addNewUser():
-            addToSession(user.user.nickname)
+            addToSession(user)
             return redirect(url_for('home'))
 
         context['Error'].append('incorrect data')

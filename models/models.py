@@ -11,6 +11,15 @@ class UserType(Model):
     type_name = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
+class UserAddModel(Model):
+    _name = 'users_add'
+    id = IntType(required=False)
+    age = IntType(default=None, required=False)
+    create_time = DateTimeType(required=True, default=datetime.now())
+    phone = StringType(default=None, required=False)
+    address = StringType(default=None, required=False)
+    sex = IntType(default=None, required=False)
+
 
 class UserModel(Model):
     _name = 'users'
@@ -25,17 +34,11 @@ class UserModel(Model):
     nickname = StringType(required=True)
     password = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
+    user_add = ModelType(UserAddModel)
 
 
-class UserAddModel(Model):
-    _name = 'users_add'
-    id = IntType(required=False)
-    age = IntType(default=None, required=False)
-    create_time = DateTimeType(required=True, default=datetime.now())
-    phone = StringType(default=None, required=False)
-    address = StringType(default=None, required=False)
-    sex = IntType(default=None, required=False)
-    user = ModelType(UserModel)
+
+
 
 
 class GroupUserModel(Model):
@@ -95,5 +98,5 @@ if __name__ == '__main__':
     user.nickname = 'test'
     user.password = 'test'
 
-    print(user.values())
+    print(user.items())
     print(user.validate())
