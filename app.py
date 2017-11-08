@@ -2,7 +2,7 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from functools import wraps
-from models.model_manager import UserManager
+from models.user_manager import UserManager
 import os
 
 # створюємо головний об'єкт сайту класу Flask
@@ -17,9 +17,9 @@ def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'username' in session:
-            return f(*args, **kwargs)
-        else:
-            return redirect(url_for('login'))
+            if UserManager.load_models.get(session['username'], None):
+                return f(*args, **kwargs)
+        return redirect(url_for('login'))
     return wrap
 
 
@@ -51,7 +51,26 @@ def logout():
         del session['username']
     return redirect(url_for('login'))
 
+@app.route('/add_friend', methods=['GET'])
+def add_friend():
+    id = int(request.args.get('id',0))
+    user = UserManager.load_models[session['username']]
+    user.add_friend(id=id)
+    return redirect(request.referrer)
 
+@app.route('/<nickname>',methods=['GET'])
+@login_required
+def user_page(nickname):
+    context = {}
+    if session.get('username', None):
+        user = UserManager.load_models[session['username']]
+        context['loginUser'] = user
+
+    selectUser = UserManager()
+    selectUser.select().And([('nickname','=',nickname)]).run()
+    context['user'] = selectUser
+
+    return render_template('home.html', context=context)
 
 # описуємо домашній роут
 # сіда зможуть попадати тільки GET запроси
@@ -64,6 +83,7 @@ def home():
         # якщо в сесії є username тоді дістаємо його дані
         # добавляємо їх в словник для передачі в html форму
         context['user'] = user
+        context['loginUser'] = user
     return render_template('home.html', context=context)
 
 

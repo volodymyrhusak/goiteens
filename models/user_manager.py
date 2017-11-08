@@ -4,6 +4,7 @@ from schematics.models import Model
 from models.base_manager import SNBaseManager
 from models.models import UserModel, UserAddModel, UserType
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
+from models.user_friend_manager import UserRelationManager
 
 
 class UserManager(SNBaseManager):
@@ -25,8 +26,20 @@ class UserManager(SNBaseManager):
             self.object.password = form.get('passw1', '')
         return self
 
+    def add_friend(self, id=None, nickname=None):
+        if not (id or nickname):
+            return
+        relationManager = UserRelationManager()
+        relationManager.addFriend(self.object.id, id)
+
+
+    def get_friends(self):
+        relationManager = UserRelationManager()
+        return relationManager.getFriends(self.object.id)
+
+
     def check_user(self):
-        self.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).serch()
+        self.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).run()
         print(self.object.id)
         if self.object.id:
             return True
@@ -35,7 +48,7 @@ class UserManager(SNBaseManager):
     def loginUser(self,lofin_form):
         email = lofin_form.get('email', '')
         password = lofin_form.get('passw', '')
-        self.select().And([('email','=',email),('password','=',password)]).serch()
+        self.select().And([('email','=',email),('password','=',password)]).run()
         if self.object.id:
             self.load_models[self.object.nickname] = self
             return True

@@ -12,6 +12,7 @@ class UserType(Model):
     type_name = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
+
 class UserAddModel(Model):
     _name = 'users_add'
     id = IntType(required=False)
@@ -36,6 +37,15 @@ class UserModel(Model):
     password = StringType(required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
     user_add = One2One(UserAddModel)
+
+
+class UserRelation(Model):
+    _name = 'user_relation'
+    id = IntType(required=False)
+    user1 = IntType(required=True)
+    user2 = IntType(required=True)
+    block = IntType(required=True, default=0)
+    create_time = DateTimeType(required=True, default=datetime.now())
 
 
 class GroupUserModel(Model):
