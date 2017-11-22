@@ -8,9 +8,6 @@ from models.user_friend_manager import UserRelationManager
 
 
 class UserManager(SNBaseManager):
-    user_type = UserType()
-    user_type.id = 1
-    user_type.type_name = 'test'
     load_models = {}
 
     def __init__(self):
