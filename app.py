@@ -3,6 +3,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from functools import wraps
 from models.user_manager import UserManager
+from models.user_type_manager import UserTypeManager
 from models.base_manager import SNBaseManager
 import os
 
@@ -53,6 +54,7 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/add_friend', methods=['GET'])
+@login_required
 def add_friend():
     user_id = int(request.args.get('id',0))
     user = UserManager.load_models[session['username']]
@@ -92,26 +94,30 @@ def addToSession(user):
     session['username'] = user.object.nickname
 
 
-@app.route('/pre_registration', methods=["GET"])
-def pre_registr():
-    return render_template('pre_registration.html')
-
 @app.route('/registration', methods=["GET", "POST"])
 def registr():
     context = {'Error': []}
+    user_type = UserTypeManager()
+    user_type.getTypeUser()
+    if session.get('username', None):
+        user = UserManager.load_models[session['username']]
+        user_type.getTypeGroup()
+        context['user'] = user
+    context['type'] = user_type
+
     if request.method == 'POST':
         user = UserManager().getModelFromForm(request.form)
         if user.check_user():
             context['Error'].append('wrong name or email')
-        if not user.object.password:
-            context['Error'].append('incorrect password')
+        if user.object.type.type_name == 'user':
+            if not user.object.password :
+                context['Error'].append('incorrect password')
         if context['Error']:
             return render_template('registration.html', context=context)
         if user.save():
             UserManager.load_models[user.object.nickname] = user
             addToSession(user)
             return redirect(url_for('home'))
-
         context['Error'].append('incorrect data')
     return render_template('registration.html', context=context)
 

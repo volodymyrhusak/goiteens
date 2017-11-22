@@ -5,22 +5,26 @@ from models.base_manager import SNBaseManager
 from models.models import UserModel, UserAddModel, UserType
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from models.user_friend_manager import UserRelationManager
-
+from models.user_type_manager import UserTypeManager
 
 class UserManager(SNBaseManager):
     load_models = {}
 
     def __init__(self):
-        self.object = UserModel()
+        class_model = UserModel
+        super(UserManager, self).__init__(class_model)
 
     def getModelFromForm(self,form):
         self.object.first_name = form.get('first_name', '')
         self.object.last_name = form.get('last_name', '')
-        self.object.type = self.user_type
+        type_manager = UserTypeManager()
+        type_manager.getType(type_name=form.get('type_name', ''))
+        self.object.type = type_manager.object
         self.object.email = form.get('email', '')
         self.object.nickname = form.get('nickname', '')
         if form.get('passw1', '') == form.get('passw2', ''):
             self.object.password = form.get('passw1', '')
+        self.object.descr = form.get('descr', '')
         return self
 
     def add_friend(self, id=None, nickname=None):
@@ -36,8 +40,10 @@ class UserManager(SNBaseManager):
 
 
     def check_user(self):
-        self.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).run()
-        print(self.object.id)
+        if self.object.type.type_name == 'user':
+            self.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).run()
+        else:
+            self.select().And([('nickname','=',self.object.nickname)]).run()
         if self.object.id:
             return True
         return False

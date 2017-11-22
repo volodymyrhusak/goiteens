@@ -60,11 +60,13 @@ class SNBaseManager():
             id = self.object.id
             self._save()
         self._update_child(self.object._name, id)
+        return True
 
     def _update_child(self, table, id):
         for man in self._table_to_update:
-            man.object[table] = id
-            man.save()
+            if man.object:
+                man.object[table] = id
+                man.save()
 
     def _save(self):
         if self.object.id:
