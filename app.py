@@ -3,6 +3,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from functools import wraps
 from models.user_manager import UserManager
+from models.base_manager import SNBaseManager
 import os
 
 # створюємо головний об'єкт сайту класу Flask
@@ -90,6 +91,10 @@ def home():
 def addToSession(user):
     session['username'] = user.object.nickname
 
+
+@app.route('/pre_registration', methods=["GET"])
+def pre_registr():
+    return render_template('pre_registration.html')
 
 @app.route('/registration', methods=["GET", "POST"])
 def registr():
