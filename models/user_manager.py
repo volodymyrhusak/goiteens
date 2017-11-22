@@ -45,9 +45,9 @@ class UserManager(SNBaseManager):
             return True
         return False
 
-    def loginUser(self,lofin_form):
-        email = lofin_form.get('email', '')
-        password = lofin_form.get('passw', '')
+    def loginUser(self,login_form):
+        email = login_form.get('email', '')
+        password = login_form.get('passw', '')
         self.select().And([('email','=',email),('password','=',password)]).run()
         if self.object.id:
             self.load_models[self.object.nickname] = self

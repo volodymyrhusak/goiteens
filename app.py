@@ -9,8 +9,8 @@ import os
 app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
-# app.secret_key = os.urandom(24)
-app.secret_key = '125'
+app.secret_key = os.urandom(24)
+# app.secret_key = '125'
 
 
 def login_required(f):
@@ -53,9 +53,9 @@ def logout():
 
 @app.route('/add_friend', methods=['GET'])
 def add_friend():
-    id = int(request.args.get('id',0))
+    user_id = int(request.args.get('id',0))
     user = UserManager.load_models[session['username']]
-    user.add_friend(id=id)
+    user.add_friend(id=user_id)
     return redirect(request.referrer)
 
 @app.route('/<nickname>',methods=['GET'])
@@ -112,4 +112,4 @@ def registr():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True)

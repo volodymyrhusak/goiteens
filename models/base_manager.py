@@ -16,7 +16,7 @@ class SNBaseManager():
     insert_sql = 'INSERT INTO {} VALUES ({})'
     insert_sql_values = '{1}'
 
-    def __init__(self, class_model=None):
+    def __init__(self, class_model):
         self.object = class_model()
 
     def itemToUpdate(self):
@@ -44,6 +44,7 @@ class SNBaseManager():
         return result.format(*[template.format(key, self._chooseTemp(primitive[key])) for key in keys])
 
     def save(self):
+        models = [atom.field.model_class if atom.field.typeclass == One2One else None for atom in self.object.atoms()]
         if self.object.id:
             sql = self.update_sql.format(self.object._name, self._sqlValues(self.update_sql_set), self.object.id)
         else:
