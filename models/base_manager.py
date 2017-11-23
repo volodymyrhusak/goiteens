@@ -102,7 +102,7 @@ class SNBaseManager():
                     raw_data = executeSelectAll(sql)
                     if not raw_data:
                         raw_data = {}
-                    resultd[atom.name] = atom.field.model_class().import_data(raw_data)
+                    resultd[atom.name] = atom.field.model_class().import_data(raw_data[0])
                 else:
                     resultd[atom.name] = data[atom.name]
             resultl.append(resultd)
