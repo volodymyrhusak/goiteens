@@ -57,6 +57,7 @@ class GroupUserModel(Model):
 
 
 class PostModel(Model):
+    _name = 'post'
     id = IntType(required=False)
     title = StringType(required=True)
     photos = StringType(required=False, default='')

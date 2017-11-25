@@ -8,6 +8,8 @@ from models.base_manager import SNBaseManager
 import os
 
 # створюємо головний об'єкт сайту класу Flask
+from models.post_manager import PostManager
+
 app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
@@ -121,6 +123,15 @@ def registr():
         context['Error'].append('incorrect data')
     return render_template('registration.html', context=context)
 
+@app.route('/add_post', methods=['GET','POST'])
+@login_required
+def add_post():
+    if request.method == 'POST':
+        post = PostManager()
+        print(list(request.form.keys()))
+        user = UserManager.load_models[session['username']]
+        post.save_post(request.form, user)
+    return render_template('add_post.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
