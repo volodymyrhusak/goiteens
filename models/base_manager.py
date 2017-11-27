@@ -100,9 +100,14 @@ class SNBaseManager():
                     man = SNBaseManager(atom.field.model_class)
                     sql = man.select().And([(str(self.object._name), '=', data['id'])]).sql
                     raw_data = executeSelectAll(sql)
-                    if not raw_data:
-                        raw_data = {}
-                    resultd[atom.name] = atom.field.model_class().import_data(raw_data[0])
+                    if isinstance(raw_data,dict):
+                        raw_data = [raw_data]
+                    elif not raw_data:
+                        raw_data = [{}]
+
+                    resultd[atom.name] = []
+                    for r_d in raw_data:
+                        resultd[atom.name].append(atom.field.model_class().import_data(r_d))
                 else:
                     resultd[atom.name] = data[atom.name]
             resultl.append(resultd)
