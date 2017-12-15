@@ -6,6 +6,8 @@ from .bool_where import BoolWhereDelete, BoolWhereSelect
 from .models import UserModel, UserAddModel, UserType
 from .executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from .my_types import One2One , One2Many
+
+
 class SNBaseManager():
     update_sql = 'UPDATE {} SET {} WHERE id = {}'
     update_sql_set = ' {0} = {1} '

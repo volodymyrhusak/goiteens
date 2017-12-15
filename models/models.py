@@ -76,7 +76,7 @@ class CommentsModel(Model):
     post = ModelType(PostModel, required=True)
     create_time = DateTimeType(required=True, default=datetime.now())
 
-PostModel.comment = ListType(ModelType(CommentsModel), required=False)
+PostModel.comment = One2Many(ModelType(CommentsModel), required=False)
 
 # class PostCommentModel(Model):
 #     _name = 'post_comment'
