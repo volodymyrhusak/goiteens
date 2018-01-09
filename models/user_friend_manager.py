@@ -5,57 +5,62 @@ from models.models import UserRelation
 
 from models.base_manager import SNBaseManager
 
-
 class UserRelationManager(SNBaseManager):
+
+
     def __init__(self):
-        class_model = UserRelation
-        super(UserRelationManager, self).__init__(class_model)
+        self.object = UserRelation()
 
-    def addFriend(self, user1, user2):
-        if not (isinstance(user1, int) and isinstance(user2, int)):
+    def addFriend(self,user,friend):
+        if not (isinstance(user, int) and isinstance(friend, int)):
             return
-        if self.getFriend(user1, user2):
+        if self.getFriend(user, friend):
             return
-        self.object.user1 = user1
-        self.object.user2 = user2
+        self.object.user1 = user
+        self.object.user2 = friend
 
-        return self.save()
+        return self.saveFriends()
 
-    def delFriend(self, user1, user2):
-        if not (isinstance(user1, int) and isinstance(user2, int)):
+    def saveFriends(self):
+        sql = self.insert_sql.format(self.object._name, self._sqlValues(self.insert_sql_values))
+        return self._executeSQL(sql)
+
+    def delFriend(self, user, friend):
+        if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        return self.delete().And([('user1', '=', user1), ('user2', '=', user2)]) \
-            .Or([('user1', '=', user2), ('user2', '=', user1)]).run()
+        return self.delete().And([('user1','=',user),('user2','=',friend)])\
+            .Or([('user1','=',friend),('user2','=',user)]).run()
 
     def getFriends(self, user):
         if not isinstance(user, int):
             return
 
-        return self.select().And([('user1', '=', user)]).Or([('user2', '=', user)]).run()
+        return self.select().And([('user1','=',user)]).Or([('user2','=',user)]).run()
 
-    def getFriend(self, user1, user2):
-        if not (isinstance(user1, int) and isinstance(user2, int)):
+    def getFriend(self, user, friend):
+        if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        return self.select().And([('user1', '=', user1), ('user2', '=', user2)]) \
-            .Or([('user1', '=', user2), ('user2', '=', user1)]).run()
+        return self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
+            .Or([('user1', '=', friend), ('user2', '=', user)]).run()
 
-    def isFriend(self, user1, user2):
-        if not (isinstance(user1, int) and isinstance(user2, int)):
+
+    def isFriend(self, user, friend):
+        if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        data = self.select().And([('user1', '=', user1), ('user2', '=', user2)]) \
-            .Or([('user1', '=', user2), ('user2', '=', user1)]).run()
+        data = self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
+            .Or([('use1r', '=', friend), ('user2', '=', user)]).run()
 
         if data:
             return True
         return False
 
-    def blockFriend(self, user1, user2):
-        if not (isinstance(user1, int) and isinstance(user2, int)):
+    def blockFriend(self,user, friend):
+        if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        relation = self.getFriend(user1, user2)
+        relation = self.getFriend(user,friend)
         relation.object.block = 1
         relation.save()
