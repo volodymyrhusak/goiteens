@@ -49,10 +49,15 @@ class SNBaseManager():
         else:
             sql = self.insert_sql.format(self.object._name, self._sqlValues(self.insert_sql_values))
         print(sql)
-        return self._executeSQL(sql)
+        return self.executeSQL(sql)
 
-    def _executeSQL(self, sql):
+    def executeSQL(self, sql):
         return executeSQL(sql)
+
+    def executeSelect(self,sql):
+        cursor = BoolWhereSelect(self)
+        cursor.sql = sql
+        cursor.run()
 
     def update(self):
         sql = self.update_sql.format(self.object._name, self._sqlValues(self.update_sql_set), self.object.id)
@@ -91,8 +96,10 @@ class SNBaseManager():
         if resultd:
             self.object.import_data(resultd)
 
-    def select(self):
-        return BoolWhereSelect(self)
+    def select(self, sql=None):
+        if not sql:
+            sql = '1=1'
+        return BoolWhereSelect(self, sql)
 
 
 if __name__ == '__main__':

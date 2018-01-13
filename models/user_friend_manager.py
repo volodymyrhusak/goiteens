@@ -36,13 +36,13 @@ class UserRelationManager(SNBaseManager):
         if not isinstance(user, int):
             return
 
-        return self.select().And([('user1','=',user)]).Or([('user2','=',user)]).run()
+        self.select().And([('user1','=',user)]).Or([('user2','=',user)]).run()
 
     def getFriend(self, user, friend):
         if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        return self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
+        self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
             .Or([('user1', '=', friend), ('user2', '=', user)]).run()
 
 
@@ -50,10 +50,10 @@ class UserRelationManager(SNBaseManager):
         if not (isinstance(user, int) and isinstance(friend, int)):
             return
 
-        data = self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
+        self.select().And([('user1', '=', user), ('user2', '=', friend)]) \
             .Or([('use1r', '=', friend), ('user2', '=', user)]).run()
 
-        if data:
+        if self.object.id:
             return True
         return False
 
