@@ -9,7 +9,6 @@ from .my_types import One2One
 
 
 
-
 class SNBaseManager():
     update_sql = 'UPDATE {} SET {} WHERE id = {}'
     update_sql_set = ' {0} = {1} '
@@ -93,8 +92,14 @@ class SNBaseManager():
                     resultd[atom.name] = data[atom.name]
             resultl.append(resultd)
 
-        if resultd:
+        if len(resultl) >= 1:
             self.object.import_data(resultd)
+        else:
+            for i, obj in enumerate(resultl):
+                self.object.import_data(obj)
+                resultl[i] = self.object
+            self.object = resultl
+
 
     def select(self, sql=None):
         if not sql:
