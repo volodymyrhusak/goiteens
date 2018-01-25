@@ -31,6 +31,22 @@ class BoolWhere():
         self.sql += result
         return self
 
+    def order_by(self,args):
+        '''
+
+        :param args: [('col1', 'DESC'), ('col2', None)]
+        :return:
+        '''
+        pat = ' ORDER BY '
+        pat2= '{} '
+        pat3= '{} '
+        for arg in args:
+            if arg[1]:
+                pat2 = pat2 + pat3
+
+            pat2.format(arg)
+        result = pat.format()
+
     def parse_args(self, args):
         return [self.template.format(arg[0], arg[1], repr(arg[2])) for arg in args]
 
@@ -45,7 +61,7 @@ class BoolWhereSelect(BoolWhere):
         self.sql = self.select_sql_from.format(self.manager.object._name) + self.select_sql_where
 
     def run(self, all=False):
-        if all:
+        if not all:
             self.Limit(1)
         print(self.sql)
         return self.manager.fillModel(self.sql)

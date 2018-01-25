@@ -68,11 +68,15 @@ class SNBaseManager():
         return executeSQL(sql)
 
     def fillModel(self, sql):
-        resultd = {}
+
         resultl = []
-        atoms = self.object.atoms()
+        atoms = list(self.object.atoms())
         datal = executeSelectAll(sql)
+        print('kio')
+        print(datal)
         for data in datal:
+            print(data)
+            resultd = {}
             for atom in atoms:
                 if atom.field.typeclass == ModelType:
                     man = SNBaseManager(atom.field.model_class)
@@ -81,6 +85,7 @@ class SNBaseManager():
                     if raw_data:
                         raw_data = raw_data[0]
                     resultd[atom.name] = atom.field.model_class().import_data(raw_data=raw_data)
+                    print('ModelType = {}'.format(resultd))
                 elif atom.field.typeclass == One2One:
                     man = SNBaseManager(atom.field.model_class)
                     sql = man.select().And([('id', '=', data['id'])]).sql
@@ -88,17 +93,29 @@ class SNBaseManager():
                     if not raw_data:
                         raw_data = {}
                     resultd[atom.name] = atom.field.model_class().import_data(raw_data)
+                    print('One2One = {}'.format(resultd))
                 else:
                     resultd[atom.name] = data[atom.name]
-            resultl.append(resultd)
+                    print('One2One = {}'.format(resultd))
+            print(dict(resultd))
+            resultl.append(dict(resultd))
 
-        if len(resultl) >= 1:
-            self.object.import_data(resultd)
-        else:
+        if len(resultl) == 1:
+            self.object.import_data(resultl[0])
+        elif len(resultl) > 1:
+            result = []
             for i, obj in enumerate(resultl):
+                # print(id(self.object))
                 self.object.import_data(obj)
-                resultl[i] = self.object
-            self.object = resultl
+                d = copy.deepcopy(self.object)
+                print('obj = {}'.format(model.id is d.id))
+                # print(id(model))
+                print(d.id)
+                result.append(d)
+                print('resultl[i] = {}'.format(result))
+            for o in result:
+                print('o.id= {}'.format(id(o)))
+            self.object = result
 
 
     def select(self, sql=None):
