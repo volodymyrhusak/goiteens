@@ -68,14 +68,10 @@ class SNBaseManager():
         return executeSQL(sql)
 
     def fillModel(self, sql):
-
         resultl = []
         atoms = list(self.object.atoms())
         datal = executeSelectAll(sql)
-        print('kio')
-        print(datal)
         for data in datal:
-            print(data)
             resultd = {}
             for atom in atoms:
                 if atom.field.typeclass == ModelType:
@@ -85,7 +81,6 @@ class SNBaseManager():
                     if raw_data:
                         raw_data = raw_data[0]
                     resultd[atom.name] = atom.field.model_class().import_data(raw_data=raw_data)
-                    print('ModelType = {}'.format(resultd))
                 elif atom.field.typeclass == One2One:
                     man = SNBaseManager(atom.field.model_class)
                     sql = man.select().And([('id', '=', data['id'])]).sql
@@ -93,11 +88,8 @@ class SNBaseManager():
                     if not raw_data:
                         raw_data = {}
                     resultd[atom.name] = atom.field.model_class().import_data(raw_data)
-                    print('One2One = {}'.format(resultd))
                 else:
                     resultd[atom.name] = data[atom.name]
-                    print('One2One = {}'.format(resultd))
-            print(dict(resultd))
             resultl.append(dict(resultd))
 
         if len(resultl) == 1:
@@ -105,16 +97,9 @@ class SNBaseManager():
         elif len(resultl) > 1:
             result = []
             for i, obj in enumerate(resultl):
-                # print(id(self.object))
-                self.object.import_data(obj)
-                d = copy.deepcopy(self.object)
-                print('obj = {}'.format(model.id is d.id))
-                # print(id(model))
-                print(d.id)
-                result.append(d)
-                print('resultl[i] = {}'.format(result))
-            for o in result:
-                print('o.id= {}'.format(id(o)))
+                model = self.object.__class__()
+                model.import_data(obj)
+                result.append(model)
             self.object = result
 
 
