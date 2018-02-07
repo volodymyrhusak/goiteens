@@ -3,7 +3,7 @@
 from datetime import datetime
 from schematics.models import Model
 from schematics.types import StringType, EmailType, BooleanType, IntType, ListType, ModelType, DateTimeType
-from .my_types import One2One
+from .my_types import One2One, One2Many
 CommentsModel = None
 
 class UserType(Model):

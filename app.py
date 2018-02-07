@@ -5,6 +5,7 @@ from functools import wraps
 from models.user_manager import UserManager
 from models.user_type_manager import UserTypeManager
 from models.base_manager import SNBaseManager
+from flask_mail import Mail, Message
 import os
 
 # створюємо головний об'єкт сайту класу Flask
@@ -14,9 +15,6 @@ app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
 app.secret_key = os.urandom(24)
-# app.secret_key = '125'
-
-
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -25,7 +23,21 @@ def login_required(f):
                 return f(*args, **kwargs)
         return redirect(url_for('login'))
     return wrap
+# app.secret_key = '125'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+# app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'vovatrap@gmail.com'
+app.config['MAIL_PASSWORD'] = 'wablezyb1992'
+mail = Mail(app)
 
+@app.route('/email')
+def email():
+    # mail.connect()
+    msg = Message('hello',sender='vovatrap@gmail.com', recipients=['vovatrap@gmail.com'])
+    msg.send(mail)
+    return 'ok'
 
 # описуємо логін роут
 # вказуємо що доступні методи "GET" і "POST"

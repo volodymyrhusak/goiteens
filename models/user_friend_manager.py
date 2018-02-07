@@ -36,7 +36,7 @@ class UserRelationManager(SNBaseManager):
         if not isinstance(user, int):
             return
 
-        self.select().And([('user1','=',user)]).Or([('user2','=',user)]).run()
+        self.select().And([('user1','=',user)]).Or([('user2','=',user)]).run(all=True)
 
     def getFriend(self, user, friend):
         if not (isinstance(user, int) and isinstance(friend, int)):

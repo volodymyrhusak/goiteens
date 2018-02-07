@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_socketio import SocketIO, emit, send ,join_room, leave_room
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 
 app = Flask(__name__)

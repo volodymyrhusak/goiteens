@@ -92,9 +92,9 @@ class SNBaseManager():
                     resultd[atom.name] = data[atom.name]
             resultl.append(dict(resultd))
 
-        if len(resultl) == 1:
+        if 'LIMIT' in sql:
             self.object.import_data(resultl[0])
-        elif len(resultl) > 1:
+        else:
             result = []
             for i, obj in enumerate(resultl):
                 model = self.object.__class__()
