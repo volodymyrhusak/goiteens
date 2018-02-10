@@ -29,14 +29,18 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 # app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'vovatrap@gmail.com'
-app.config['MAIL_PASSWORD'] = 'wablezyb1992'
+app.config['MAIL_PASSWORD'] = ''
 mail = Mail(app)
 
 @app.route('/email')
 def email():
     # mail.connect()
     msg = Message('hello',sender='vovatrap@gmail.com', recipients=['vovatrap@gmail.com'])
-    msg.send(mail)
+    # msg.send(mail)
+    app.logger.debug('hello')
+    app.logger.info('hello')
+    app.logger.error('hello')
+    app.logger.warning('hello')
     return 'ok'
 
 # описуємо логін роут
@@ -146,4 +150,6 @@ def add_post():
     return render_template('add_post.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.logger.level =  10
+    print(app.logger.level)
+    app.run()

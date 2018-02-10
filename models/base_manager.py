@@ -3,9 +3,9 @@ from schematics.models import Model
 from schematics.types import ModelType
 
 from models.bool_where import BoolWhereDelete , BoolWhereSelect
-from .models import UserModel, UserAddModel, UserType
+from .model import UserModel, UserAddModel, UserType
 from .executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
-from .my_types import One2One
+from .my_types import One2One, One2Many
 
 
 
@@ -17,6 +17,8 @@ class SNBaseManager():
 
     def __init__(self, class_model=None):
         self.object = class_model()
+
+    self._table_to_update = []
 
     def itemToUpdate(self):
         atoms = self.object.atoms()
@@ -33,6 +35,8 @@ class SNBaseManager():
             return item['id']
         elif isinstance(item, int):
             return item
+        elif isinstance(item, ModelType):
+            return item.id
         return repr(str(item))
 
     def _sqlValues(self, template):
@@ -43,6 +47,37 @@ class SNBaseManager():
         return result.format(*[template.format(key, self._chooseTemp(primitive[key])) for key in keys])
 
     def save(self):
+        atoms = self.object.atoms()
+        for atom in atoms:
+            if atom.field.typeclass == ModelType:
+                man = SNBaseManager()
+                man.object = atom.value
+                man.save()
+            elif atom.field.typeclass == One2One:
+                man = SNBaseManager()
+                man.object = atom.value
+                self._table_to_update.append(man)
+            elif atom.field.typeclass == One2Many:
+                for mod in atom.value:
+                    man = SNBaseManager()
+                    man.object = mod
+                    self._table_to_update.append(man)
+
+        if not self.object.id:
+            id = self._save()
+        else:
+            id = self.object.id
+            self._save()
+        self._update_child(self.object._name, id)
+        return True
+
+    def _update_child(self, table, id):
+        for man in self._table_to_update:
+            if man.object:
+                man.object[table] = id
+                man.save()
+
+    def _save(self):
         if self.object.id:
             sql = self.update_sql.format(self.object._name, self._sqlValues(self.update_sql_set), self.object.id)
         else:
@@ -88,6 +123,16 @@ class SNBaseManager():
                     if not raw_data:
                         raw_data = {}
                     resultd[atom.name] = atom.field.model_class().import_data(raw_data)
+                elif atom.field.typeclass == One2Many:
+                    man = SNBaseManager(atom.field.model_class)
+                    sql = man.select().And([('id', '=', data['id'])]).sql
+                    raw_data = executeSelectAll(sql)
+                    if not raw_data:
+                        raw_data = []
+                    res = []
+                    for i in raw_data:
+                        res.append(atom.field.model_class().import_data(i))
+                    resultd[atom.name] = res
                 else:
                     resultd[atom.name] = data[atom.name]
             resultl.append(dict(resultd))
