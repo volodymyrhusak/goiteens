@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from models.models import UserType
+from models.model import UserType
 from models.base_manager import SNBaseManager
 
 

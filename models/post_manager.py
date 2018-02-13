@@ -1,4 +1,4 @@
-from models.models import PostModel ,UserModel ,CommentsModel
+from models.model import PostModel ,UserModel ,CommentsModel
 
 from models.base_manager import SNBaseManager
 from models.user_manager import UserManager

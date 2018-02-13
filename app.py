@@ -150,6 +150,4 @@ def add_post():
     return render_template('add_post.html')
 
 if __name__ == '__main__':
-    app.logger.level =  10
-    print(app.logger.level)
-    app.run()
+    app.run(debug=True)

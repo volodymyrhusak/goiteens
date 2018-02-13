@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 
-from models.models import UserRelation
+from models.model import UserRelation
 
 from models.base_manager import SNBaseManager
 

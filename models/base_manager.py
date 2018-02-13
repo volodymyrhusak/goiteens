@@ -16,8 +16,7 @@ class SNBaseManager():
 
     def __init__(self, class_model=None):
         self.object = class_model()
-
-    self._table_to_update = []
+        self._table_to_update = []
 
     def itemToUpdate(self):
         atoms = self.object.atoms()
@@ -146,9 +145,10 @@ class SNBaseManager():
             self.object.import_data(self.fillData(datal[0], atoms))
         else:
             result = []
-            for i, obj in enumerate(self.fillData(datal, atoms)):
+            for i, data in enumerate(datal):
+                import_data = self.fillData(data, atoms)
                 model = self.object.__class__()
-                model.import_data(obj)
+                model.import_data(raw_data=import_data)
                 result.append(model)
             self.object = result
 
@@ -160,24 +160,4 @@ class SNBaseManager():
 
 if __name__ == '__main__':
     man = SNBaseManager(UserModel)
-    typep = UserType()
-    typep.id = 1
-    typep.name = 'test'
 
-    # man.object.id = 1
-    man.object.first_name = 'test'
-    man.object.last_name = 'test'
-    man.object.type = typep
-    man.object.descr = 'test'
-    man.object.user_photo = 'test'
-    man.object.user_photos = ['test']
-    man.object.email = 'testtest.test'
-    man.object.nickname = 'test'
-    man.object.password = 'test'
-    man.object.user_add = UserAddModel()
-    atoms = man.object.atoms()
-    for i in atoms:
-        if i.field.typeclass == One2One:
-            print(i.field.__dict__)
-            print(i.field.typeclass)
-            print(i.field.model_class._name)

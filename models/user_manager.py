@@ -2,7 +2,7 @@
 from schematics.models import Model
 
 from models.base_manager import SNBaseManager
-from models.models import UserModel, UserAddModel, UserType
+from models.model import UserModel, UserAddModel, UserType
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from models.user_friend_manager import UserRelationManager
 from models.user_type_manager import UserTypeManager
