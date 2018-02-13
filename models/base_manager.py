@@ -2,11 +2,10 @@
 from schematics.models import Model
 from schematics.types import ModelType
 
-from models.bool_where import BoolWhereDelete , BoolWhereSelect
+from models.bool_where import BoolWhereDelete, BoolWhereSelect
 from .model import UserModel, UserAddModel, UserType
 from .executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from .my_types import One2One, One2Many
-
 
 
 class SNBaseManager():
@@ -88,7 +87,7 @@ class SNBaseManager():
     def executeSQL(self, sql):
         return executeSQL(sql)
 
-    def executeSelect(self,sql):
+    def executeSelect(self, sql):
         cursor = BoolWhereSelect(self)
         cursor.sql = sql
         cursor.run()
@@ -99,54 +98,59 @@ class SNBaseManager():
     def delete(self):
         return BoolWhereDelete(self)
 
-    def _delete(self,sql):
+    def _delete(self, sql):
         return executeSQL(sql)
 
+    def fillData(self, data, atoms):
+        resultd = {}
+        for atom in atoms:
+            if atom.field.typeclass == ModelType:
+                man = SNBaseManager(atom.field.model_class)
+                class_obj = atom.field.model_class()
+                sql = man.select().And([('id', '=', data[atom.name])]).sql
+                raw_data = executeSelectAll(sql)
+                if raw_data:
+                    import_data = self.fillData(raw_data[0], class_obj.atoms())
+                resultd[atom.name] = class_obj.import_data(raw_data=import_data)
+            elif atom.field.typeclass == One2One:
+                man = SNBaseManager(atom.field.model_class)
+                class_obj = atom.field.model_class()
+                sql = man.select().And([('id', '=', data['id'])]).sql
+                raw_data = executeSelectAll(sql)
+                if raw_data:
+                    import_data = self.fillData(raw_data[0], class_obj.atoms())
+                resultd[atom.name] = class_obj.import_data(raw_data=import_data)
+            elif atom.field.typeclass == One2Many:
+                man = SNBaseManager(atom.field.model_class)
+                class_obj = atom.field.model_class()
+                sql = man.select().And([('id', '=', data['id'])]).sql
+                raw_data = executeSelectAll(sql)
+                if not raw_data:
+                    raw_data = []
+                res = []
+                for i in raw_data:
+                    import_data = self.fillData(i, class_obj.atoms())
+                    res.append(class_obj.import_data(import_data))
+                resultd[atom.name] = res
+            else:
+                resultd[atom.name] = data[atom.name]
+
+        return resultd
+
     def fillModel(self, sql):
-        resultl = []
+
         atoms = list(self.object.atoms())
         datal = executeSelectAll(sql)
-        for data in datal:
-            resultd = {}
-            for atom in atoms:
-                if atom.field.typeclass == ModelType:
-                    man = SNBaseManager(atom.field.model_class)
-                    sql = man.select().And([('id', '=', data[atom.name])]).sql
-                    raw_data = executeSelectAll(sql)
-                    if raw_data:
-                        raw_data = raw_data[0]
-                    resultd[atom.name] = atom.field.model_class().import_data(raw_data=raw_data)
-                elif atom.field.typeclass == One2One:
-                    man = SNBaseManager(atom.field.model_class)
-                    sql = man.select().And([('id', '=', data['id'])]).sql
-                    raw_data = executeSelectAll(sql)
-                    if not raw_data:
-                        raw_data = {}
-                    resultd[atom.name] = atom.field.model_class().import_data(raw_data)
-                elif atom.field.typeclass == One2Many:
-                    man = SNBaseManager(atom.field.model_class)
-                    sql = man.select().And([('id', '=', data['id'])]).sql
-                    raw_data = executeSelectAll(sql)
-                    if not raw_data:
-                        raw_data = []
-                    res = []
-                    for i in raw_data:
-                        res.append(atom.field.model_class().import_data(i))
-                    resultd[atom.name] = res
-                else:
-                    resultd[atom.name] = data[atom.name]
-            resultl.append(dict(resultd))
 
-        if 'LIMIT' in sql:
-            self.object.import_data(resultl[0])
+        if 'LIMIT' in sql and datal:
+            self.object.import_data(self.fillData(datal[0], atoms))
         else:
             result = []
-            for i, obj in enumerate(resultl):
+            for i, obj in enumerate(self.fillData(datal, atoms)):
                 model = self.object.__class__()
                 model.import_data(obj)
                 result.append(model)
             self.object = result
-
 
     def select(self, sql=None):
         if not sql:
