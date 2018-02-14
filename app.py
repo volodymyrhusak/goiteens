@@ -37,7 +37,7 @@ def email():
     # mail.connect()
     msg = Message('hello',sender='vovatrap@gmail.com', recipients=['vovatrap@gmail.com'])
     # msg.send(mail)
-    app.logger.debug('hello')
+    app.logger.debug('msg = {}'.format(msg))
     app.logger.info('hello')
     app.logger.error('hello')
     app.logger.warning('hello')
@@ -128,7 +128,7 @@ def registr():
         if user.check_user():
             context['Error'].append('wrong name or email')
         if user.object.type.type_name == 'user':
-            if not user.object.password :
+            if not user.object.password:
                 context['Error'].append('incorrect password')
         if context['Error']:
             return render_template('registration.html', context=context)
