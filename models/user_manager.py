@@ -19,6 +19,7 @@ class UserManager(SNBaseManager):
         self.object.last_name = form.get('last_name', '')
         type_manager = UserTypeManager()
         type_manager.getType(type_name=form.get('type_name', ''))
+        print(type_manager.object)
         self.object.type = type_manager.object
         self.object.email = form.get('email', '')
         self.object.nickname = form.get('nickname', '')
@@ -51,11 +52,12 @@ class UserManager(SNBaseManager):
 
 
     def check_user(self):
+        manager = UserManager()
         if self.object.type.type_name == 'user':
-            self.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).run()
+            manager.select().And([('nickname','=',self.object.nickname),('email','=',self.object.email)]).run()
         else:
-            self.select().And([('nickname','=',self.object.nickname)]).run()
-        if self.object.id:
+            manager.select().And([('nickname','=',self.object.nickname)]).run()
+        if manager.object.id:
             return True
         return False
 

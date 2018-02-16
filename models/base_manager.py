@@ -48,16 +48,17 @@ class SNBaseManager():
         atoms = self.object.atoms()
         for atom in atoms:
             if atom.field.typeclass == ModelType:
-                man = SNBaseManager()
+                man = SNBaseManager(atom.field.model_class)
                 man.object = atom.value
                 man.save()
             elif atom.field.typeclass == One2One:
-                man = SNBaseManager()
+                man = SNBaseManager(atom.field.model_class)
                 man.object = atom.value
                 self._table_to_update.append(man)
             elif atom.field.typeclass == One2Many:
                 for mod in atom.value:
-                    man = SNBaseManager()
+                    print('mod = {}'.format(mod))
+                    man = SNBaseManager(mod)
                     man.object = mod
                     self._table_to_update.append(man)
 
@@ -109,6 +110,7 @@ class SNBaseManager():
         raw_data = self.executeSelect(sql)
         if raw_data and not all:
             import_data = self.fillData(raw_data[0], class_obj.atoms())
+            print('import_data = {}'.format(import_data))
             return class_obj.import_data(raw_data=import_data)
         elif raw_data:
             res = []
@@ -120,6 +122,7 @@ class SNBaseManager():
         elif all:
             return []
         else:
+            print('return class_obj')
             return class_obj
 
 

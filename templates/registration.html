@@ -14,13 +14,14 @@
   {%if context.type.object.type_name == 'user':%}
 
     First Name:<br>
+    <input type="text" name="type_name" value="user" hidden="true">
   {%else%}
     Group Name:<br>
+  <input type="text" name="type_name" value="group" hidden="true">
   {%endif%}
 
   <input type="text" name="first_name" value="">
   <br>
-    <input type="text" name="type_name" value="group">
 
   {%if context.type.object.type_name == 'user':%}
     Last Name:<br>
