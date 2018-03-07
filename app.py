@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
-from flask import Flask, request, render_template, redirect, url_for, session
+import random
+
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from models.executeSqlite3 import executeSelectOne, executeSelectAll, executeSQL
 from functools import wraps
 from models.user_manager import UserManager
@@ -14,7 +16,9 @@ from models.post_manager import PostManager
 app = Flask(__name__)
 # добавляємо секретний ключ для сайту щоб шифрувати дані сессії
 # при кожнаму сапуску фласку буде генечитись новий рандомний ключ з 24 символів
-app.secret_key = os.urandom(24)
+# app.secret_key = os.urandom(24)
+app.secret_key = '121212121212'
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -148,6 +152,27 @@ def add_post():
         user = UserManager.load_models[session['username']]
         post.save_post(request.form, user)
     return render_template('add_post.html')
+
+@app.route('/add_like', methods=['POST'])
+@login_required
+def add_like():
+    app.logger.debug('request.is_xhr = {}'.format(request.is_xhr))
+    if request.is_xhr:
+        # print(str(request.json['id']))
+        user = UserManager.load_models[session['username']]
+        app.logger.debug('user = {} like post with id = {}'.format(user.object.first_name, request.json['id']))
+        ok =random.choice([True,False])
+        print(ok)
+        if ok:
+            return jsonify({'status':'ok'})
+        return jsonify({'status':'error','message':'something wrong'})
+
+
+@app.route('/like_example')
+@login_required
+def like_example():
+    return render_template('index.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
