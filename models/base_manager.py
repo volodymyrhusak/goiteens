@@ -64,6 +64,7 @@ class SNBaseManager():
 
         if not self.object.id:
             id = self._save()
+            self.object.id = id
         else:
             id = self.object.id
             self._save()
